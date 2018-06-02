@@ -1,0 +1,20 @@
+{
+  "name": "tflori/riki-framework",
+  "type": "library",
+  "description": "A minimalistic framework to connect different libraries within your application.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Thomas Flori",
+      "email": "thflori@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Riki\\": "src"
+    }
+  }
+}
