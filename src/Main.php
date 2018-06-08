@@ -4,9 +4,6 @@ namespace Riki;
 
 abstract class Main
 {
-    abstract public function bootstrap();
-    abstract public function run();
-
     /**
      * Call $handler with $args
      *
