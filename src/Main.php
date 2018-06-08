@@ -18,7 +18,7 @@ abstract class Main
     {
         if (is_callable($handler)) {
             call_user_func_array($handler, $args);
-        } elseif (preg_match('/^([^ ]+)@([^ ]+)$/', $handler, $match) && class_exists($match[2])) {
+        } elseif (preg_match('/^([^ ]+)@([^ ]+)$/', $handler, $match)) {
             call_user_func_array([$this->getController($match[2]), $match[1]], $args);
         } else {
             throw new Exception('Handler not callable');
@@ -32,9 +32,13 @@ abstract class Main
      *
      * @param $class
      * @return mixed
+     * @throws Exception
      */
-    protected function getController($class)
+    protected function getController(string $class)
     {
+        if (!class_exists($class)) {
+            throw new Exception('Controller class ' . $class . ' not found');
+        }
         return new $class;
     }
 }
