@@ -12,14 +12,15 @@ abstract class Main
      *
      * @param string|callable $handler
      * @param array           ...$args
+     * @return mixed
      * @throws Exception
      */
     protected function callHandler($handler, ...$args)
     {
         if (is_callable($handler)) {
-            call_user_func_array($handler, $args);
+            return call_user_func_array($handler, $args);
         } elseif (preg_match('/^([^ ]+)@([^ ]+)$/', $handler, $match)) {
-            call_user_func_array([$this->getController($match[2]), $match[1]], $args);
+            return call_user_func_array([$this->getController($match[2]), $match[1]], $args);
         } else {
             throw new Exception('Handler not callable');
         }
