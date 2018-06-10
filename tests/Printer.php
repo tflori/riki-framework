@@ -37,7 +37,7 @@ class Printer extends ResultPrinter
     /**
      * {@inheritdoc}
      */
-    protected function writeProgress($progress): void
+    protected function writeProgress(string $progress): void
     {
         if ($this->hasReplacementSymbol($progress)) {
             $progress = static::$symbols[$progress];
