@@ -2,7 +2,7 @@
 
 namespace Riki;
 
-class Environment
+abstract class Environment
 {
     /** @var string */
     protected $basePath;

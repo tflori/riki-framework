@@ -2,10 +2,15 @@
 
 namespace Riki;
 
-
 use Symfony\Component\Dotenv\Dotenv;
 
-class Config
+/**
+ * Class Config
+ *
+ * @package Riki
+ * @author  Thomas Flori <thflori@gmail.com>
+ */
+abstract class Config
 {
     /** @var Environment */
     public $environment;
@@ -13,6 +18,11 @@ class Config
     /** @var array */
     protected $env = [];
 
+    /**
+     * Loads .env and stores the current environment
+     *
+     * @param Environment $environment
+     */
     public function __construct(Environment $environment)
     {
         $this->environment = $environment;
@@ -21,11 +31,23 @@ class Config
         unset($this->env['SYMFONY_DOTENV_VARS']);
     }
 
+    /**
+     * Get an environment variable (also works from cached config)
+     *
+     * @param string $name
+     * @param null   $default
+     * @return mixed
+     */
     public function env(string $name, $default = null)
     {
         return $this->env[$name] ?? $default;
     }
 
+    /**
+     * Loads the .env file configured in environment
+     *
+     * @return bool
+     */
     protected function loadDotEnv(): bool
     {
         if (!$this->environment->usesDotEnv()) {
