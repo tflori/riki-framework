@@ -58,7 +58,7 @@ abstract class Application extends Container
     {
         $bootstrappers = $this->getBootstrappers();
         array_push($bootstrappers, ...$kernel->getBootstrappers());
-        $this->bootstrap($bootstrappers);
+        $this->bootstrap(...$bootstrappers);
         return $kernel->handle(...$args);
     }
 
