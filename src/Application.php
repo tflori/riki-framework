@@ -10,9 +10,9 @@ use DependencyInjector\Container;
  * @package Riki
  * @author  Thomas Flori <thflori@gmail.com>
  *
- * @property-read Container app
- * @property-read Environment environment
- * @property-read Config config
+ * @property-read Container $app
+ * @property-read Environment $environment
+ * @property-read Config $config
  */
 abstract class Application extends Container
 {
