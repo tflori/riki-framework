@@ -67,21 +67,6 @@ abstract class Config
 
     // CACHING
 
-    public static function restoreOrCreate(Environment $environment): Config
-    {
-        if ($environment->canCacheConfig()) {
-            $cachePath = $environment->getConfigCachePath();
-
-            if (is_readable($cachePath) && !is_dir($cachePath)) {
-                $config = unserialize(file_get_contents($cachePath));
-                $config->environment = $environment;
-                return $config;
-            }
-        }
-
-        return new static($environment);
-    }
-
     public function cache(): bool
     {
         if ($this->environment->canCacheConfig()) {
