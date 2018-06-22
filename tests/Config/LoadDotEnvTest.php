@@ -56,4 +56,13 @@ class LoadDotEnvTest extends MockeryTestCase
 
         self::assertSame('/tmp/storage', $result);
     }
+
+    /** @test */
+    public function removesSymfonysDotEntVars()
+    {
+        $config = new Example($this->env);
+        $result = $config->env('SYMFONY_DOTENV_VARS');
+
+        self::assertNull($result);
+    }
 }

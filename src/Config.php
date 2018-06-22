@@ -65,20 +65,15 @@ abstract class Config
         return true;
     }
 
-    // CACHING
-
-    public function cache(): bool
-    {
-        if ($this->environment->canCacheConfig()) {
-            return file_put_contents($this->environment->getConfigCachePath(), serialize($this));
-        }
-
-        return false;
-    }
-
+    /**
+     * Ensures the environment does not get serialized for caching
+     *
+     * @return array
+     */
     public function __sleep()
     {
-        $this->environment = null;
-        return array_keys(get_class_vars(static::class));
+        $vars = array_keys(get_class_vars(static::class));
+        array_splice($vars, array_search('environment', $vars), 1);
+        return $vars;
     }
 }

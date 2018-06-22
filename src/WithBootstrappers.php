@@ -18,7 +18,7 @@ trait WithBootstrappers
     }
 
     /**
-     * @return callable[]
+     * @return callable[]|array
      */
     public function getBootstrappers()
     {

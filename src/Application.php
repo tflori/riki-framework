@@ -80,6 +80,10 @@ abstract class Application extends Container
     }
 
     /**
+     * Detects the environment for APP_ENV environment variable or 'Development'
+     *
+     * When there is a *Cli environment and this is executed via command line it prefers *Cli.
+     *
      * @param Application $app
      * @return bool
      * @throws Exception
@@ -98,8 +102,8 @@ abstract class Application extends Container
         }
         foreach (array_reverse($classes) as $class) {
             if (class_exists($class)) {
-                $this->instance('environment', new $class($this->basePath));
-                $this->alias('environment', $this->fallbackEnvironment);
+                $app->instance('environment', new $class($this->basePath));
+                $app->alias('environment', $this->fallbackEnvironment);
                 return true;
             }
         }
@@ -122,7 +126,9 @@ abstract class Application extends Container
         $environment = $this->get('environment');
         $cachePath = $environment->getConfigCachePath();
         if ($environment->canCacheConfig() && is_readable($cachePath) && !is_dir($cachePath)) {
+            /** @var Config $config */
             $config = unserialize(file_get_contents($cachePath));
+            $config->environment = $environment;
         } else {
             $class = $this->configClass;
             $config =  new $class($environment);
