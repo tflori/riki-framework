@@ -1,5 +1,8 @@
 # ríki
 
+[![Build Status](https://travis-ci.org/tflori/riki-framework.svg?branch=master)](https://travis-ci.org/tflori/riki-framework)
+[![Coverage Status](https://coveralls.io/repos/github/tflori/riki-framework/badge.svg?branch=master)](https://coveralls.io/github/tflori/riki-framework?branch=master)
+
 This is a minimalistic framework. The only thing this framework defines (for now) is how to configure the project and
 how to define special behaviour on an environment.
 
