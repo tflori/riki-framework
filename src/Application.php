@@ -56,9 +56,7 @@ abstract class Application extends Container
      */
     public function run(Kernel $kernel, ...$args)
     {
-        $bootstrappers = $this->getBootstrappers();
-        array_push($bootstrappers, ...$kernel->getBootstrappers());
-        $this->bootstrap(...$bootstrappers);
+        $this->bootstrap(...$this->getBootstrappers(), ...$kernel->getBootstrappers());
         return $kernel->handle(...$args);
     }
 
@@ -69,13 +67,34 @@ abstract class Application extends Container
     protected function bootstrap(callable ...$bootstrappers)
     {
         foreach ($bootstrappers as $bootstrapper) {
-            try {
-                if (!$bootstrapper($this)) {
-                    throw new \Exception('Unknown error');
-                }
-            } catch (\Throwable | \Exception $ex) {
-                throw new Exception('Unexpected exception in bootstrap process', 0, $ex);
+            if (!call_user_func($bootstrapper, $this)) {
+                throw new Exception(sprintf(
+                    '%s failed for unknown reason',
+                    $this->getBootstrapperName($bootstrapper)
+                ));
             }
+        }
+    }
+
+    /**
+     * Helper to get the name of a bootstrapper
+     *
+     * @param callable $cb
+     * @return callable|string
+     */
+    protected function getBootstrapperName(callable $cb)
+    {
+        $prefix = 'Bootstrapper ';
+        if (is_array($cb)) {
+            list($obj, $method) = $cb;
+            $class = is_object($obj) ? get_class($obj) : $obj;
+            return $prefix . $class . '::' . $method;
+        } elseif (is_string($cb)) {
+            return $prefix . $cb;
+        } elseif (is_object($cb) && !$cb instanceof \Closure) {
+            return $prefix . get_class($cb);
+        } else {
+            return 'Unknown bootstrapper';
         }
     }
 

@@ -1,21 +1,19 @@
 <?php
 
-namespace Riki\Test\Application;
+namespace Riki\Test\Example;
 
-use Riki\Application;
-use Riki\Test\Application\Environment\Fallback;
-use Riki\Test\Config\Example as ConfigExample;
+use Riki\Test\Example\Environment\Fallback;
 
-class Example extends Application
+class Application extends \Riki\Application
 {
     protected $fallbackEnvironment = Fallback::class;
     protected $environmentNamespace = Environment::class;
-    protected $configClass = ConfigExample::class;
+    protected $configClass = Config::class;
 
     public function __construct(
         string $basePath,
         string $fallbackEnvironment = Fallback::class,
-        string $configClass = ConfigExample::class
+        string $configClass = Config::class
     ) {
         parent::__construct($basePath);
         $this->fallbackEnvironment = $fallbackEnvironment;

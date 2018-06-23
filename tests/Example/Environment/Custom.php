@@ -1,6 +1,6 @@
 <?php
 
-namespace Riki\Test\Application\Environment;
+namespace Riki\Test\Example\Environment;
 
 use Riki\Environment;
 

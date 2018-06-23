@@ -2,9 +2,10 @@
 
 namespace Riki\Test\Config;
 
-use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Mockery as m;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Environment;
+use Riki\Test\Example\Config;
 
 class SerializationTest extends MockeryTestCase
 {
@@ -21,7 +22,7 @@ class SerializationTest extends MockeryTestCase
     /** @test */
     public function doesNotContainTheEnvironment()
     {
-        $config = new Example($this->env);
+        $config = new Config($this->env);
         $serialized = serialize($config);
 
         self::assertNotContains('environment', $serialized);
@@ -30,7 +31,7 @@ class SerializationTest extends MockeryTestCase
     /** @test */
     public function containsConstructedVars()
     {
-        $config = new Example($this->env);
+        $config = new Config($this->env);
         $serialized = serialize($config);
 
         self::assertContains('host', $serialized);
@@ -40,7 +41,7 @@ class SerializationTest extends MockeryTestCase
     /** @test */
     public function containsSimpleVars()
     {
-        $config = new Example($this->env);
+        $config = new Config($this->env);
         $serialized = serialize($config);
 
         self::assertContains('randomKey', $serialized);

@@ -1,11 +1,10 @@
 <?php
 
-namespace Riki\Test\Config;
+namespace Riki\Test\Example;
 
-use Riki\Config;
 use Riki\Environment;
 
-class Example extends Config
+class Config extends \Riki\Config
 {
     /** @var \stdClass */
     public $dbConfig;

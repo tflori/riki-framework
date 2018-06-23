@@ -2,9 +2,10 @@
 
 namespace Riki\Test\Config;
 
+use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Environment;
-use Mockery as m;
+use Riki\Test\Example\Config;
 
 class LoadDotEnvTest extends MockeryTestCase
 {
@@ -25,7 +26,7 @@ class LoadDotEnvTest extends MockeryTestCase
     {
         $this->env->shouldReceive('usesDotEnv')->with()->once()->andReturn(false);
 
-        new Example($this->env);
+        new Config($this->env);
     }
 
     /** @test */
@@ -33,7 +34,7 @@ class LoadDotEnvTest extends MockeryTestCase
     {
         $this->env->shouldReceive('getDotEnvPath')->with()->once()->andReturn(__DIR__ . '/not-existing.env');
 
-        new Example($this->env);
+        new Config($this->env);
     }
 
     /** @test */
@@ -41,7 +42,7 @@ class LoadDotEnvTest extends MockeryTestCase
     {
         $this->env->shouldReceive('getBasePath')->with()->once()->andReturn('/tmp');
 
-        new Example($this->env);
+        new Config($this->env);
 
         self::assertSame('/tmp', getenv('BASE_PATH'));
     }
@@ -51,7 +52,7 @@ class LoadDotEnvTest extends MockeryTestCase
     {
         $this->env->shouldReceive('getBasePath')->andReturn('/tmp');
 
-        $config = new Example($this->env);
+        $config = new Config($this->env);
         $result = $config->env('STORAGE_PATH');
 
         self::assertSame('/tmp/storage', $result);
@@ -60,7 +61,7 @@ class LoadDotEnvTest extends MockeryTestCase
     /** @test */
     public function removesSymfonysDotEntVars()
     {
-        $config = new Example($this->env);
+        $config = new Config($this->env);
         $result = $config->env('SYMFONY_DOTENV_VARS');
 
         self::assertNull($result);

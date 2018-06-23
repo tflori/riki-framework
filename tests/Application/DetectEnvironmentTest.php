@@ -4,10 +4,11 @@ namespace Riki\Test\Application;
 
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Exception;
-use Riki\Test\Application\Environment\Custom;
-use Riki\Test\Application\Environment\Development;
-use Riki\Test\Application\Environment\Fallback;
-use Riki\Test\Application\Environment\ProductionCli;
+use Riki\Test\Example\Environment\Custom;
+use Riki\Test\Example\Environment\Development;
+use Riki\Test\Example\Environment\Fallback;
+use Riki\Test\Example\Environment\ProductionCli;
+use Riki\Test\Example\Application;
 
 class DetectEnvironmentTest extends MockeryTestCase
 {
@@ -21,7 +22,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     public function createsTheFallbackEnvironment()
     {
         putenv('APP_ENV=strange');
-        $app = new Example(__DIR__);
+        $app = new Application(__DIR__);
 
         $app->detectEnvironment($app);
 
@@ -31,7 +32,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     /** @test */
     public function createsDevelopmentByDefault()
     {
-        $app = new Example(__DIR__);
+        $app = new Application(__DIR__);
 
         $app->detectEnvironment($app);
 
@@ -42,7 +43,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     public function createsSpecificEnvironment()
     {
         putenv('APP_ENV=custom');
-        $app = new Example(__DIR__);
+        $app = new Application(__DIR__);
 
         $app->detectEnvironment($app);
 
@@ -53,7 +54,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     public function prefersCli()
     {
         putenv('APP_ENV=production');
-        $app = new Example(__DIR__);
+        $app = new Application(__DIR__);
 
         $app->detectEnvironment($app);
 
@@ -64,7 +65,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     public function throwsWhenFallbackIsNotAvailable()
     {
         putenv('APP_ENV=strange');
-        $app = new Example(__DIR__, 'UnknownClass');
+        $app = new Application(__DIR__, 'UnknownClass');
 
         self::expectException(Exception::class);
         self::expectExceptionMessage('No environment found');
@@ -75,7 +76,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     /** @test */
     public function doesNotOverloadWhenLoaded()
     {
-        $app = new Example(__DIR__);
+        $app = new Application(__DIR__);
         $app->detectEnvironment($app);
         $environment = $app->environment;
         putenv('APP_ENV=custom');

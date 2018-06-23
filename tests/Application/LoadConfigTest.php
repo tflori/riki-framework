@@ -2,17 +2,18 @@
 
 namespace Riki\Test\Application;
 
+use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Config;
 use Riki\Environment;
-use Mockery as m;
 use Riki\Exception;
-use Riki\Test\Application\Environment\Fallback;
-use Riki\Test\Config\Example as ConfigExample;
+use Riki\Test\Example\Environment\Fallback;
+use Riki\Test\Example\Application;
+use Riki\Test\Example\Config as ConfigExample;
 
 class LoadConfigTest extends MockeryTestCase
 {
-    /** @var Example */
+    /** @var Application */
     protected $app;
 
     /** @var Environment|m\Mock */
@@ -21,7 +22,7 @@ class LoadConfigTest extends MockeryTestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->app = new Example(__DIR__);
+        $this->app = new Application(__DIR__);
         $this->environment = m::mock(Environment::class, [__DIR__])->makePartial();
         $this->app->instance('environment', $this->environment);
     }
@@ -49,7 +50,7 @@ class LoadConfigTest extends MockeryTestCase
     public function loadsSerializedConfig()
     {
         $this->environment->shouldReceive('getConfigCachePath')->with()
-            ->once()->andReturn(__DIR__ . '/config.ser');
+            ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
         $this->app->loadConfig($this->app);
 
@@ -60,7 +61,7 @@ class LoadConfigTest extends MockeryTestCase
     public function setsTheCurrentEnvironment()
     {
         $this->environment->shouldReceive('getConfigCachePath')->with()
-            ->once()->andReturn(__DIR__ . '/config.ser');
+            ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
         $this->app->loadConfig($this->app);
 
@@ -70,7 +71,7 @@ class LoadConfigTest extends MockeryTestCase
     /** @test */
     public function throwsWhenConfigDoesNotExist()
     {
-        $app = new Example(__DIR__, Fallback::class, 'UnknownClass');
+        $app = new Application(__DIR__, Fallback::class, 'UnknownClass');
         $app->instance('environment', new Fallback(__DIR__));
 
         self::expectException(Exception::class);

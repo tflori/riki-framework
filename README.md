@@ -13,7 +13,7 @@ application.
 
 Because of this is not really a framework we built a community platform that helps you developing using no framework.
 
-## Example
+## Config
 
 The example how to use this framework (or how to develop without a framework) is the [ríki community platform
 ](https://github.com/tflori/riki-community).
