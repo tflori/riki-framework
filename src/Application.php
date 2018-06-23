@@ -123,23 +123,20 @@ abstract class Application extends Container
         }
 
         /** @var \Riki\Environment $environment */
-        $environment = $this->get('environment');
+        $environment = $app->get('environment');
         $cachePath = $environment->getConfigCachePath();
         if ($environment->canCacheConfig() && is_readable($cachePath) && !is_dir($cachePath)) {
             /** @var Config $config */
             $config = unserialize(file_get_contents($cachePath));
             $config->environment = $environment;
+        } elseif (class_exists($this->configClass)) {
+            $config =  new $this->configClass($environment);
         } else {
-            $class = $this->configClass;
-            $config =  new $class($environment);
-        }
-
-        if (!$config) {
             throw new Exception('Configuration not found');
         }
 
-        $this->instance('config', $config);
-        $this->alias('config', $this->configClass);
+        $app->instance('config', $config);
+        $app->alias('config', $this->configClass);
         return true;
     }
 }
