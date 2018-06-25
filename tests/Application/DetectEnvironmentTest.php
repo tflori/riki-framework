@@ -24,7 +24,7 @@ class DetectEnvironmentTest extends MockeryTestCase
         putenv('APP_ENV=strange');
         $app = new Application(__DIR__);
 
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
 
         self::assertInstanceOf(Fallback::class, $app->environment);
     }
@@ -34,7 +34,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     {
         $app = new Application(__DIR__);
 
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
 
         self::assertInstanceOf(Development::class, $app->environment);
     }
@@ -45,7 +45,7 @@ class DetectEnvironmentTest extends MockeryTestCase
         putenv('APP_ENV=custom');
         $app = new Application(__DIR__);
 
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
 
         self::assertInstanceOf(Custom::class, $app->environment);
     }
@@ -56,7 +56,7 @@ class DetectEnvironmentTest extends MockeryTestCase
         putenv('APP_ENV=production');
         $app = new Application(__DIR__);
 
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
 
         self::assertInstanceOf(ProductionCli::class, $app->environment);
     }
@@ -70,18 +70,18 @@ class DetectEnvironmentTest extends MockeryTestCase
         self::expectException(Exception::class);
         self::expectExceptionMessage('No environment found');
 
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
     }
 
     /** @test */
     public function doesNotOverloadWhenLoaded()
     {
         $app = new Application(__DIR__);
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
         $environment = $app->environment;
         putenv('APP_ENV=custom');
 
-        $app->detectEnvironment($app);
+        Application::detectEnvironment($app);
 
         self::assertSame($environment, $app->environment);
     }

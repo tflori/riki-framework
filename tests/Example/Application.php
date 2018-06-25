@@ -6,9 +6,9 @@ use Riki\Test\Example\Environment\Fallback;
 
 class Application extends \Riki\Application
 {
-    protected $fallbackEnvironment = Fallback::class;
-    protected $environmentNamespace = Environment::class;
-    protected $configClass = Config::class;
+    protected static $fallbackEnvironment = Fallback::class;
+    protected static $environmentNamespace = Environment::class;
+    protected static $configClass = Config::class;
 
     public function __construct(
         string $basePath,
@@ -16,7 +16,7 @@ class Application extends \Riki\Application
         string $configClass = Config::class
     ) {
         parent::__construct($basePath);
-        $this->fallbackEnvironment = $fallbackEnvironment;
-        $this->configClass = $configClass;
+        static::$fallbackEnvironment = $fallbackEnvironment;
+        static::$configClass = $configClass;
     }
 }

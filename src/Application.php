@@ -22,13 +22,13 @@ abstract class Application extends Container
     protected $basePath;
 
     /** @var string  */
-    protected $fallbackEnvironment = 'App\Environment';
+    protected static $fallbackEnvironment = 'App\Environment';
 
     /** @var string  */
-    protected $environmentNamespace = 'App\Environment';
+    protected static $environmentNamespace = 'App\Environment';
 
     /** @var string */
-    protected $configClass = 'App\Config';
+    protected static $configClass = 'App\Config';
 
     /**
      * @param string $basePath
@@ -43,8 +43,8 @@ abstract class Application extends Container
         $this->basePath = $basePath;
 
         $this->addBootstrappers(
-            [$this, 'detectEnvironment'],
-            [$this, 'loadConfig']
+            [static::class, 'detectEnvironment'],
+            [static::class, 'loadConfig']
         );
     }
 
@@ -107,22 +107,22 @@ abstract class Application extends Container
      * @return bool
      * @throws Exception
      */
-    public function detectEnvironment(Application $app): bool
+    public static function detectEnvironment(Application $app): bool
     {
         if ($app->has('environment')) {
             return true;
         }
 
-        $classes = [ $this->fallbackEnvironment ];
+        $classes = [ static::$fallbackEnvironment ];
         $appEnv = getenv('APP_ENV') ?: 'development';
-        $classes[] = $this->environmentNamespace . '\\' . ucfirst($appEnv);
+        $classes[] = static::$environmentNamespace . '\\' . ucfirst($appEnv);
         if (PHP_SAPI === 'cli') {
-            $classes[] = $this->environmentNamespace . '\\' . ucfirst($appEnv) . 'Cli';
+            $classes[] = static::$environmentNamespace . '\\' . ucfirst($appEnv) . 'Cli';
         }
         foreach (array_reverse($classes) as $class) {
             if (class_exists($class)) {
-                $app->instance('environment', new $class($this->basePath));
-                $app->alias('environment', $this->fallbackEnvironment);
+                $app->instance('environment', new $class($app->getBasePath()));
+                $app->alias('environment', static::$fallbackEnvironment);
                 return true;
             }
         }
@@ -131,11 +131,16 @@ abstract class Application extends Container
     }
 
     /**
+     * Loads the configuration
+     *
+     * When caching is enabled and a cached config exists this will be loaded otherwise a new object will be
+     * initialized.
+     *
      * @param Application $app
      * @return bool
      * @throws Exception
      */
-    public function loadConfig(Application $app): bool
+    public static function loadConfig(Application $app): bool
     {
         if ($app->has('config')) {
             return true;
@@ -148,14 +153,19 @@ abstract class Application extends Container
             /** @var Config $config */
             $config = unserialize(file_get_contents($cachePath));
             $config->environment = $environment;
-        } elseif (class_exists($this->configClass)) {
-            $config =  new $this->configClass($environment);
+        } elseif (class_exists(static::$configClass)) {
+            $config =  new static::$configClass($environment);
         } else {
             throw new Exception('Configuration not found');
         }
 
         $app->instance('config', $config);
-        $app->alias('config', $this->configClass);
+        $app->alias('config', static::$configClass);
         return true;
+    }
+
+    public function getBasePath(): string
+    {
+        return $this->basePath;
     }
 }

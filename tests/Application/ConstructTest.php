@@ -37,8 +37,8 @@ class ConstructTest extends TestCase
 
         self::assertCount(2, $bootstrappers);
         self::assertEquals([
-            [$app, 'detectEnvironment'],
-            [$app, 'loadConfig'],
+            [Application::class, 'detectEnvironment'],
+            [Application::class, 'loadConfig'],
         ], $bootstrappers);
     }
 }

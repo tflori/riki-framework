@@ -21,16 +21,23 @@ class LoadConfigTest extends MockeryTestCase
 
     protected function setUp()
     {
-        parent::setUp();
         $this->app = new Application(__DIR__);
         $this->environment = m::mock(Environment::class, [__DIR__])->makePartial();
         $this->app->instance('environment', $this->environment);
+        $this->environment->shouldReceive('canCacheConfig')->with()->andReturn(true)->byDefault();
+    }
+
+    protected function tearDown()
+    {
+        if (file_exists('/tmp/config.ser')) {
+            unlink('/tmp/config.ser');
+        }
     }
 
     /** @test */
     public function storesTheConfigInstance()
     {
-        $this->app->loadConfig($this->app);
+        Application::loadConfig($this->app);
 
         self::assertInstanceOf(Config::class, $this->app->config);
         self::assertInstanceOf(Config::class, $this->app->get(ConfigExample::class));
@@ -41,7 +48,7 @@ class LoadConfigTest extends MockeryTestCase
     {
         $this->app->instance('config', $config = new ConfigExample($this->app->environment));
 
-        $this->app->loadConfig($this->app);
+        Application::loadConfig($this->app);
 
         self::assertSame($config, $this->app->config);
     }
@@ -52,9 +59,22 @@ class LoadConfigTest extends MockeryTestCase
         $this->environment->shouldReceive('getConfigCachePath')->with()
             ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
-        $this->app->loadConfig($this->app);
+        Application::loadConfig($this->app);
 
         self::assertSame('Ie0g2aUbJi8=', $this->app->config->key);
+    }
+
+    /** @test */
+    public function instantiatesNewConfig()
+    {
+        $this->environment->shouldReceive('canCacheConfig')->with()
+            ->once()->andReturn(false);
+        $this->environment->shouldReceive('getConfigCachePath')->with()
+            ->once()->andReturn(__DIR__ . '/../Example/config.ser');
+
+        Application::loadConfig($this->app);
+
+        self::assertNotSame('Ie0g2aUbJi8=', $this->app->config->key);
     }
 
     /** @test */
@@ -63,7 +83,7 @@ class LoadConfigTest extends MockeryTestCase
         $this->environment->shouldReceive('getConfigCachePath')->with()
             ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
-        $this->app->loadConfig($this->app);
+        Application::loadConfig($this->app);
 
         self::assertSame($this->environment, $this->app->config->environment);
     }
@@ -77,6 +97,6 @@ class LoadConfigTest extends MockeryTestCase
         self::expectException(Exception::class);
         self::expectExceptionMessage('Configuration not found');
 
-        $app->loadConfig($app);
+        Application::loadConfig($app);
     }
 }
