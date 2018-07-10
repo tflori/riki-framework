@@ -24,7 +24,7 @@ class DetectEnvironmentTest extends MockeryTestCase
         putenv('APP_ENV=strange');
         $app = new Application(__DIR__);
 
-        Application::detectEnvironment($app);
+        $app->detectEnvironment();
 
         self::assertInstanceOf(Fallback::class, $app->environment);
     }
@@ -34,7 +34,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     {
         $app = new Application(__DIR__);
 
-        Application::detectEnvironment($app);
+        $app->detectEnvironment();
 
         self::assertInstanceOf(Development::class, $app->environment);
     }
@@ -45,7 +45,7 @@ class DetectEnvironmentTest extends MockeryTestCase
         putenv('APP_ENV=custom');
         $app = new Application(__DIR__);
 
-        Application::detectEnvironment($app);
+        $app->detectEnvironment();
 
         self::assertInstanceOf(Custom::class, $app->environment);
     }
@@ -56,7 +56,7 @@ class DetectEnvironmentTest extends MockeryTestCase
         putenv('APP_ENV=production');
         $app = new Application(__DIR__);
 
-        Application::detectEnvironment($app);
+        $app->detectEnvironment();
 
         self::assertInstanceOf(ProductionCli::class, $app->environment);
     }
@@ -65,24 +65,11 @@ class DetectEnvironmentTest extends MockeryTestCase
     public function throwsWhenFallbackIsNotAvailable()
     {
         putenv('APP_ENV=strange');
-        $app = new Application(__DIR__, 'UnknownClass');
 
         self::expectException(Exception::class);
         self::expectExceptionMessage('No environment found');
 
-        Application::detectEnvironment($app);
-    }
+        $app = new Application(__DIR__, 'UnknownClass');
 
-    /** @test */
-    public function doesNotOverloadWhenLoaded()
-    {
-        $app = new Application(__DIR__);
-        Application::detectEnvironment($app);
-        $environment = $app->environment;
-        putenv('APP_ENV=custom');
-
-        Application::detectEnvironment($app);
-
-        self::assertSame($environment, $app->environment);
     }
 }

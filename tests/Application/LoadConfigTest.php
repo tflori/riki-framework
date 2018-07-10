@@ -37,20 +37,10 @@ class LoadConfigTest extends MockeryTestCase
     /** @test */
     public function storesTheConfigInstance()
     {
-        Application::loadConfig($this->app);
+        $this->app->loadConfiguration();
 
         self::assertInstanceOf(Config::class, $this->app->config);
         self::assertInstanceOf(Config::class, $this->app->get(ConfigExample::class));
-    }
-
-    /** @test */
-    public function sticksWithCurrentConfig()
-    {
-        $this->app->instance('config', $config = new ConfigExample($this->app->environment));
-
-        Application::loadConfig($this->app);
-
-        self::assertSame($config, $this->app->config);
     }
 
     /** @test */
@@ -59,7 +49,7 @@ class LoadConfigTest extends MockeryTestCase
         $this->environment->shouldReceive('getConfigCachePath')->with()
             ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
-        Application::loadConfig($this->app);
+        $this->app->loadConfiguration();
 
         self::assertSame('Ie0g2aUbJi8=', $this->app->config->key);
     }
@@ -72,7 +62,7 @@ class LoadConfigTest extends MockeryTestCase
         $this->environment->shouldReceive('getConfigCachePath')->with()
             ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
-        Application::loadConfig($this->app);
+        $this->app->loadConfiguration();
 
         self::assertNotSame('Ie0g2aUbJi8=', $this->app->config->key);
     }
@@ -83,7 +73,7 @@ class LoadConfigTest extends MockeryTestCase
         $this->environment->shouldReceive('getConfigCachePath')->with()
             ->once()->andReturn(__DIR__ . '/../Example/config.ser');
 
-        Application::loadConfig($this->app);
+        $this->app->loadConfiguration();
 
         self::assertSame($this->environment, $this->app->config->environment);
     }
@@ -91,12 +81,10 @@ class LoadConfigTest extends MockeryTestCase
     /** @test */
     public function throwsWhenConfigDoesNotExist()
     {
-        $app = new Application(__DIR__, Fallback::class, 'UnknownClass');
-        $app->instance('environment', new Fallback(__DIR__));
-
         self::expectException(Exception::class);
         self::expectExceptionMessage('Configuration not found');
 
-        Application::loadConfig($app);
+        $app = new Application(__DIR__, Fallback::class, 'UnknownClass');
+        $app->instance('environment', new Fallback(__DIR__));
     }
 }

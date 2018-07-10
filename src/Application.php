@@ -16,8 +16,6 @@ use DependencyInjector\Container;
  */
 abstract class Application extends Container
 {
-    use WithBootstrappers;
-
     /** @var string */
     protected $basePath;
 
@@ -41,11 +39,8 @@ abstract class Application extends Container
         \DependencyInjector\DI::setContainer($this);
 
         $this->basePath = $basePath;
-
-        $this->addBootstrappers(
-            [static::class, 'detectEnvironment'],
-            [static::class, 'loadConfig']
-        );
+        $this->detectEnvironment();
+        $this->loadConfiguration();
     }
 
     /**
@@ -56,8 +51,8 @@ abstract class Application extends Container
      */
     public function run(Kernel $kernel, ...$args)
     {
-        $this->bootstrap(...$this->getBootstrappers(), ...$kernel->getBootstrappers());
-        return $kernel->handle(...$args);
+        $this->bootstrap(...$kernel->getBootstrappers());
+        return $kernel->handle($this, ...$args);
     }
 
     /**
@@ -103,16 +98,11 @@ abstract class Application extends Container
      *
      * When there is a *Cli environment and this is executed via command line it prefers *Cli.
      *
-     * @param Application $app
      * @return bool
      * @throws Exception
      */
-    public static function detectEnvironment(Application $app): bool
+    public function detectEnvironment(): bool
     {
-        if ($app->has('environment')) {
-            return true;
-        }
-
         $classes = [ static::$fallbackEnvironment ];
         $appEnv = getenv('APP_ENV') ?: 'development';
         $classes[] = static::$environmentNamespace . '\\' . ucfirst($appEnv);
@@ -121,8 +111,8 @@ abstract class Application extends Container
         }
         foreach (array_reverse($classes) as $class) {
             if (class_exists($class)) {
-                $app->instance('environment', new $class($app->getBasePath()));
-                $app->alias('environment', static::$fallbackEnvironment);
+                $this->instance('environment', new $class($this->getBasePath()));
+                $this->alias('environment', static::$fallbackEnvironment);
                 return true;
             }
         }
@@ -136,18 +126,17 @@ abstract class Application extends Container
      * When caching is enabled and a cached config exists this will be loaded otherwise a new object will be
      * initialized.
      *
-     * @param Application $app
      * @return bool
      * @throws Exception
      */
-    public static function loadConfig(Application $app): bool
+    public function loadConfiguration(): bool
     {
-        if ($app->has('config')) {
-            return true;
+        /** @var \Riki\Environment $environment */
+        $environment = $this->get('environment');
+        if (!$environment) {
+            throw new Exception('Environment not defined.');
         }
 
-        /** @var \Riki\Environment $environment */
-        $environment = $app->get('environment');
         $cachePath = $environment->getConfigCachePath();
         if ($environment->canCacheConfig() && is_readable($cachePath) && !is_dir($cachePath)) {
             /** @var Config $config */
@@ -159,8 +148,8 @@ abstract class Application extends Container
             throw new Exception('Configuration not found');
         }
 
-        $app->instance('config', $config);
-        $app->alias('config', static::$configClass);
+        $this->instance('config', $config);
+        $this->alias('config', static::$configClass);
         return true;
     }
 

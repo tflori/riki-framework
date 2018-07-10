@@ -59,7 +59,7 @@ class RunTest extends MockeryTestCase
     /** @test */
     public function callsHandleWithAdditionalArgs()
     {
-        $this->kernel->shouldReceive('handle')->with('foo', 'bar')
+        $this->kernel->shouldReceive('handle')->with($this->app, 'foo', 'bar')
             ->once()->andReturn(42);
 
         $result = $this->app->run($this->kernel, 'foo', 'bar');

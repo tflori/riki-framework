@@ -3,10 +3,11 @@
 namespace Riki\Test\Application;
 
 use DependencyInjector\DI;
-use PHPUnit\Framework\TestCase;
+use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Test\Example\Application;
+use Mockery as m;
 
-class ConstructTest extends TestCase
+class ConstructTest extends MockeryTestCase
 {
     /** @test */
     public function storesItselfInTheContainer()
@@ -29,16 +30,22 @@ class ConstructTest extends TestCase
     }
 
     /** @test */
-    public function addsTwoBootstrappers()
+    public function detectsEnvironmentInConstructor()
     {
-        $app = new Application(__DIR__ . '/..');
+        $app = m::mock(Application::class)->makePartial();
+        $app->shouldReceive('detectEnvironment')->with()
+            ->once()->passthru();
 
-        $bootstrappers = $app->getBootstrappers();
+        $app->__construct(__DIR__ . '/..');
+    }
 
-        self::assertCount(2, $bootstrappers);
-        self::assertEquals([
-            [Application::class, 'detectEnvironment'],
-            [Application::class, 'loadConfig'],
-        ], $bootstrappers);
+    /** @test */
+    public function loadsConfigurationInConstructor()
+    {
+        $app = m::mock(Application::class)->makePartial();
+        $app->shouldReceive('loadConfiguration')->with()
+            ->once()->passthru();
+
+        $app->__construct(__DIR__ . '/..');
     }
 }

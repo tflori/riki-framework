@@ -15,8 +15,8 @@ class Application extends \Riki\Application
         string $fallbackEnvironment = Fallback::class,
         string $configClass = Config::class
     ) {
-        parent::__construct($basePath);
         static::$fallbackEnvironment = $fallbackEnvironment;
         static::$configClass = $configClass;
+        parent::__construct($basePath);
     }
 }
