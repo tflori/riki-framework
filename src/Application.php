@@ -3,6 +3,7 @@
 namespace Riki;
 
 use DependencyInjector\Container;
+use DependencyInjector\DI;
 
 /**
  * Class Application
@@ -33,14 +34,23 @@ abstract class Application extends Container
      */
     public function __construct(string $basePath)
     {
-        parent::__construct();
-        $this->alias('container', Application::class);
-        $this->alias('container', 'app');
-        \DependencyInjector\DI::setContainer($this);
-
         $this->basePath = $basePath;
+
+        parent::__construct();
+        DI::setContainer($this);
+
+        $this->initDependencies();
         $this->detectEnvironment();
         $this->loadConfiguration();
+    }
+
+    /**
+     * Defines all dependencies / namespaces / aliases
+     */
+    protected function initDependencies()
+    {
+        $this->instance(Application::class, $this);
+        $this->instance('app', $this);
     }
 
     /**
