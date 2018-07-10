@@ -70,6 +70,5 @@ class DetectEnvironmentTest extends MockeryTestCase
         self::expectExceptionMessage('No environment found');
 
         $app = new Application(__DIR__, 'UnknownClass');
-
     }
 }
