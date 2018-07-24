@@ -23,7 +23,7 @@ The example how to use this framework (or how to develop without a framework) is
 
 ## Install
 
-You should really use the [guide](https://riki.w00tserver.org) to learn more about this philosophiwc approach of php
+You should really use the [guide](https://riki.w00tserver.org) to learn more about this philosophic approach of php
 development.
 
 Anyway you can install this library as any other library as well: 
