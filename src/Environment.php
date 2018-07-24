@@ -2,6 +2,15 @@
 
 namespace Riki;
 
+/**
+ * Class Environment
+ *
+ * Other then the configurations of the environment file this configurations are specific to an environment type (e. g.
+ * a development environment) and can be inherited.
+ *
+ * @package Riki
+ * @author  Thomas Flori <thflori@gmail.com>
+ */
 abstract class Environment
 {
     /** @var string */

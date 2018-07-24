@@ -155,9 +155,6 @@ abstract class Application extends Container
     {
         /** @var \Riki\Environment $environment */
         $environment = $this->get('environment');
-        if (!$environment) {
-            throw new Exception('Environment not defined.');
-        }
 
         $cachePath = $environment->getConfigCachePath();
         if ($environment->canCacheConfig() && is_readable($cachePath) && !is_dir($cachePath)) {

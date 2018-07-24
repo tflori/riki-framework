@@ -2,12 +2,20 @@
 
 namespace Riki;
 
+/**
+ * Class Kernel
+ *
+ * @package Riki
+ * @author  Thomas Flori <thflori@gmail.com>
+ */
 abstract class Kernel
 {
     /** @var callable[] */
     protected $bootstrappers = [];
 
     /**
+     * Add bootstrappers for this Kernel
+     *
      * @param callable ...$bootstrapper
      * @return $this
      */
@@ -17,10 +25,7 @@ abstract class Kernel
         return $this;
     }
 
-    /**
-     * @return callable[]|array
-     */
-    public function getBootstrappers()
+    public function getBootstrappers(): array
     {
         return $this->bootstrappers;
     }

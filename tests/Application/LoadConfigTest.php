@@ -2,6 +2,7 @@
 
 namespace Riki\Test\Application;
 
+use DependencyInjector\NotFoundException;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Config;
@@ -86,5 +87,15 @@ class LoadConfigTest extends MockeryTestCase
 
         $app = new Application(__DIR__, Fallback::class, 'UnknownClass');
         $app->instance('environment', new Fallback(__DIR__));
+    }
+
+    /** @test */
+    public function throwsWhenEnvironmentIsNotDefined()
+    {
+        self::expectException(NotFoundException::class);
+        self::expectExceptionMessage('Name environment could not be resolved');
+
+        $this->app->delete('environment');
+        $this->app->loadConfiguration();
     }
 }

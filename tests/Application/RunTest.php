@@ -7,6 +7,7 @@ use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Exception;
 use Riki\Kernel;
 use Riki\Test\Example\Application;
+use Riki\Test\Example\Kernel as ExampleKernel;
 use Riki\Test\Example\OptionLoader;
 
 class RunTest extends MockeryTestCase
@@ -80,5 +81,16 @@ class RunTest extends MockeryTestCase
         self::expectExceptionMessage($name . ' failed for unknown reason');
 
         $this->app->run($this->kernel);
+    }
+
+    /** @test */
+    public function alwaysExecutesBootstrappers()
+    {
+        $kernel = new ExampleKernel();
+
+        $this->app->run($kernel);
+        $result = $this->app->run($kernel);
+
+        self::assertTrue($result);
     }
 }
