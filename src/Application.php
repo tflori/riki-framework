@@ -30,7 +30,10 @@ abstract class Application extends Container
     protected static $configClass = 'App\Config';
 
     /**
+     * Application Constructor
+     *
      * @param string $basePath
+     * @throws Exception
      */
     public function __construct(string $basePath)
     {
@@ -54,8 +57,13 @@ abstract class Application extends Container
     }
 
     /**
+     * Bootstrap and run $kernel with $args
+     *
+     * There is no logic to skip bootstrappers or stop if $kernel was already executed. This logic is related to your
+     * Kernel and needs to be added there if needed.
+     *
      * @param Kernel $kernel
-     * @param mixed  ...$args
+     * @param mixed  ...$args Arguments to be passed to $kernel->handle()
      * @return mixed
      * @throws \Exception
      */
@@ -66,6 +74,10 @@ abstract class Application extends Container
     }
 
     /**
+     * Execute the $bootstrappers
+     *
+     * Every bootstrapper needs to return a truthful value (e. g. true, 1 etc.).
+     *
      * @param callable ...$bootstrappers
      * @throws Exception
      */
@@ -104,7 +116,7 @@ abstract class Application extends Container
     }
 
     /**
-     * Detects the environment for APP_ENV environment variable or 'Development'
+     * Detects the environment for APP_ENV environment variable or 'development'
      *
      * When there is a *Cli environment and this is executed via command line it prefers *Cli.
      *
