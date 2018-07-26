@@ -15,7 +15,7 @@
   "require": {
     "php": "^7.1",
     "symfony/dotenv": "^4.1",
-    "tflori/dependency-injector": "^2.0"
+    "tflori/dependency-injector": "^2.1"
   },
   "autoload": {
     "psr-4": {
