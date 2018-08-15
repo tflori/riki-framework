@@ -42,6 +42,13 @@ class RunTest extends MockeryTestCase
         $kernel->shouldReceive('getBootstrappers')->andReturn([])->byDefault();
     }
 
+    protected function tearDown()
+    {
+        parent::tearDown();
+        Application::app()->destroy();
+    }
+
+
     /** @test */
     public function executesTheBootstrappers()
     {

@@ -15,6 +15,7 @@ class DetectEnvironmentTest extends MockeryTestCase
     protected function tearDown()
     {
         parent::tearDown();
+        Application::app()->destroy();
         putenv('APP_ENV=');
     }
 

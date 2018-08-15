@@ -4,11 +4,18 @@ namespace Riki\Test\Application;
 
 use DependencyInjector\DI;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
+use Riki\Exception;
 use Riki\Test\Example\Application;
 use Mockery as m;
 
 class ConstructTest extends MockeryTestCase
 {
+    protected function tearDown()
+    {
+        parent::tearDown();
+        Application::app()->destroy();
+    }
+
     /** @test */
     public function storesItselfInTheContainer()
     {
@@ -47,5 +54,16 @@ class ConstructTest extends MockeryTestCase
             ->once()->passthru();
 
         $app->__construct(__DIR__ . '/..');
+    }
+
+    /** @test */
+    public function allowOnlyOneInstance()
+    {
+        $app = new Application(__DIR__ . '/..');
+
+        self::expectException(Exception::class);
+        self::expectExceptionMessage('There can only be one application at the same time');
+
+        new Application(__DIR__ . '/..');
     }
 }

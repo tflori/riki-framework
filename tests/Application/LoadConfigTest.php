@@ -33,6 +33,7 @@ class LoadConfigTest extends MockeryTestCase
         if (file_exists('/tmp/config.ser')) {
             unlink('/tmp/config.ser');
         }
+        Application::app()->destroy();
     }
 
     /** @test */
@@ -82,6 +83,7 @@ class LoadConfigTest extends MockeryTestCase
     /** @test */
     public function throwsWhenConfigDoesNotExist()
     {
+        Application::app()->destroy();
         self::expectException(Exception::class);
         self::expectExceptionMessage('Configuration not found');
 

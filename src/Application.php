@@ -11,12 +11,18 @@ use DependencyInjector\DI;
  * @package Riki
  * @author  Thomas Flori <thflori@gmail.com>
  *
+ * @method static static app()
+ * @method static Environment environment()
+ * @method static Config config()
  * @property-read Container $app
  * @property-read Environment $environment
  * @property-read Config $config
  */
 abstract class Application extends Container
 {
+    /** @var Application */
+    protected static $app;
+
     /** @var string */
     protected $basePath;
 
@@ -37,6 +43,11 @@ abstract class Application extends Container
      */
     public function __construct(string $basePath)
     {
+        if (static::$app) {
+            throw new Exception('There can only be one application at the same time');
+        }
+        static::$app = $this;
+
         $this->basePath = $basePath;
 
         parent::__construct();
@@ -45,6 +56,31 @@ abstract class Application extends Container
         $this->initDependencies();
         $this->detectEnvironment();
         $this->loadConfiguration();
+    }
+
+    /**
+     * Destroy the application
+     *
+     * After destroying you can create a new application.
+     */
+    public function destroy()
+    {
+        static::$app = null;
+        $this->factories = [];
+        $this->namespaces = [];
+    }
+
+    /**
+     * Static method to get named dependencies.
+     *
+     * @param string $method
+     * @param array $args
+     * @return mixed
+     * @codeCoverageIgnore trivial code
+     */
+    public static function __callStatic($method, $args)
+    {
+        return static::$app->get($method, ...$args);
     }
 
     /**
