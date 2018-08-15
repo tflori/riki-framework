@@ -106,7 +106,7 @@ abstract class Application extends Container
     public function run(Kernel $kernel, ...$args)
     {
         $this->bootstrap(...$kernel->getBootstrappers());
-        return $kernel->handle($this, ...$args);
+        return $kernel->handle(...$args);
     }
 
     /**
