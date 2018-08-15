@@ -33,8 +33,7 @@ abstract class Kernel
     /**
      * Handle the request using $app
      *
-     * @param Application $app
      * @return mixed
      */
-    abstract public function handle(Application $app);
+    abstract public function handle();
 }

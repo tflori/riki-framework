@@ -13,7 +13,7 @@ class Kernel extends \Riki\Kernel
         $this->addBootstrappers([$this, 'reset']);
     }
 
-    public function handle(Application $app, $request = null)
+    public function handle($request = null)
     {
         $this->executions++;
         return $this->executions === 1;
