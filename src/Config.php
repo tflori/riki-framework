@@ -40,7 +40,19 @@ abstract class Config
      */
     public function env(string $name, $default = null)
     {
-        return $this->env[$name] ?? $default;
+        $value = $this->env[$name] ?? $default;
+
+        if (is_string($value)) {
+            if (is_numeric($value)) {
+                return (double)$value === round((double)$value) ? (int)$value : (double)$value;
+            }
+
+            if (in_array($value, ['true', 'false'], true)) {
+                return $value === 'true';
+            }
+        }
+
+        return $value;
     }
 
     /**

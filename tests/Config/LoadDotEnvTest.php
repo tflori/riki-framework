@@ -66,4 +66,40 @@ class LoadDotEnvTest extends MockeryTestCase
 
         self::assertNull($result);
     }
+
+    /** @test */
+    public function convertsIntegers()
+    {
+        $config = new Config($this->env);
+        $result = $config->env('INTEGER');
+
+        self::assertSame(42, $result);
+    }
+
+    /** @test */
+    public function convertsFloats()
+    {
+        $config = new Config($this->env);
+        $result = $config->env('FLOAT');
+
+        self::assertSame(99.99, $result);
+    }
+
+    /** @test */
+    public function convertsTrue()
+    {
+        $config = new Config($this->env);
+        $result = $config->env('BOOLEAN_TRUE');
+
+        self::assertTrue($result);
+    }
+
+    /** @test */
+    public function convertsFalse()
+    {
+        $config = new Config($this->env);
+        $result = $config->env('BOOLEAN_FALSE');
+
+        self::assertFalse($result);
+    }
 }
