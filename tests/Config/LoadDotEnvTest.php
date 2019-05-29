@@ -59,15 +59,6 @@ class LoadDotEnvTest extends MockeryTestCase
     }
 
     /** @test */
-    public function removesSymfonysDotEntVars()
-    {
-        $config = new Config($this->env);
-        $result = $config->env('SYMFONY_DOTENV_VARS');
-
-        self::assertNull($result);
-    }
-
-    /** @test */
     public function convertsIntegers()
     {
         $config = new Config($this->env);
