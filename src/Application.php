@@ -53,9 +53,11 @@ abstract class Application extends Container
         parent::__construct();
         DI::setContainer($this);
 
-        $this->initDependencies();
+        $this->instance(Application::class, $this);
+        $this->instance('app', $this);
         $this->detectEnvironment();
         $this->loadConfiguration();
+        $this->initDependencies();
     }
 
     /**
@@ -88,8 +90,6 @@ abstract class Application extends Container
      */
     protected function initDependencies()
     {
-        $this->instance(Application::class, $this);
-        $this->instance('app', $this);
     }
 
     /**
