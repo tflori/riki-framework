@@ -10,24 +10,18 @@ namespace Riki;
  */
 abstract class Kernel
 {
-    /** @var callable[] */
-    protected $bootstrappers = [];
+    /** @var Application */
+    protected $app;
 
     /**
-     * Add bootstrappers for this Kernel
+     * Kernel constructor.
      *
-     * @param callable ...$bootstrapper
-     * @return $this
+     * @param Application $app
+     * @codeCoverageIgnore
      */
-    public function addBootstrappers(callable ...$bootstrapper)
+    public function __construct(Application $app)
     {
-        array_push($this->bootstrappers, ...$bootstrapper);
-        return $this;
-    }
-
-    public function getBootstrappers(): array
-    {
-        return $this->bootstrappers;
+        $this->app = $app;
     }
 
     /**

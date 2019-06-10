@@ -105,50 +105,7 @@ abstract class Application extends Container
      */
     public function run(Kernel $kernel, ...$args)
     {
-        $this->bootstrap(...$kernel->getBootstrappers());
         return $kernel->handle(...$args);
-    }
-
-    /**
-     * Execute the $bootstrappers
-     *
-     * Every bootstrapper needs to return a truthful value (e. g. true, 1 etc.).
-     *
-     * @param callable ...$bootstrappers
-     * @throws Exception
-     */
-    protected function bootstrap(callable ...$bootstrappers)
-    {
-        foreach ($bootstrappers as $bootstrapper) {
-            if (!call_user_func($bootstrapper, $this)) {
-                throw new Exception(sprintf(
-                    '%s failed for unknown reason',
-                    $this->getBootstrapperName($bootstrapper)
-                ));
-            }
-        }
-    }
-
-    /**
-     * Helper to get the name of a bootstrapper
-     *
-     * @param callable $cb
-     * @return callable|string
-     */
-    protected function getBootstrapperName(callable $cb)
-    {
-        $prefix = 'Bootstrapper ';
-        if (is_array($cb)) {
-            list($obj, $method) = $cb;
-            $class = is_object($obj) ? get_class($obj) : $obj;
-            return $prefix . $class . '::' . $method;
-        } elseif (is_string($cb)) {
-            return $prefix . $cb;
-        } elseif (is_object($cb) && !$cb instanceof \Closure) {
-            return $prefix . get_class($cb);
-        } else {
-            return 'Unknown bootstrapper';
-        }
     }
 
     /**
