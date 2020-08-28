@@ -2,7 +2,7 @@
 
 namespace Riki;
 
-use Symfony\Component\Dotenv\Dotenv;
+use EnvParser\EnvFile;
 
 /**
  * Class Config
@@ -15,7 +15,7 @@ abstract class Config
     /** @var Environment */
     public $environment;
 
-    /** @var array */
+    /** @var EnvFile */
     protected $env = [];
 
     /**
@@ -27,32 +27,22 @@ abstract class Config
     {
         $this->environment = $environment;
         $this->loadDotEnv();
-        $this->env = $_ENV;
-        unset($this->env['SYMFONY_DOTENV_VARS']);
     }
 
     /**
      * Get an environment variable (also works from cached config)
      *
-     * @param string $name
-     * @param null   $default
+     * @param ?string $name
+     * @param ?mixed  $default
      * @return mixed
      */
-    public function env(string $name, $default = null)
+    public function env(string $name = null, $default = null)
     {
-        $value = $_ENV[$name] ?? $this->env[$name] ?? $default;
-
-        if (is_string($value)) {
-            if (is_numeric($value)) {
-                return (double)$value === round((double)$value) ? (int)$value : (double)$value;
-            }
-
-            if (in_array($value, ['true', 'false'], true)) {
-                return $value === 'true';
-            }
+        if (is_null($name)) {
+            return $this->env->getArrayCopy();
         }
 
-        return $value;
+        return $this->env->get($name, $default);
     }
 
     /**
@@ -72,8 +62,8 @@ abstract class Config
         }
 
         putenv('BASE_PATH=' . $this->environment->getBasePath());
-        $dotEnv = new Dotenv();
-        $dotEnv->load($dotEnvPath);
+        $this->env = new EnvFile();
+        $this->env->read($dotEnvPath);
         return true;
     }
 

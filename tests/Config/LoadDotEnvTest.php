@@ -59,38 +59,20 @@ class LoadDotEnvTest extends MockeryTestCase
     }
 
     /** @test */
-    public function convertsIntegers()
+    public function returnsDefaultWhenMissing()
     {
         $config = new Config($this->env);
-        $result = $config->env('INTEGER');
+        $result = $config->env('ANOTHER_PATH', '/dev/null');
 
-        self::assertSame(42, $result);
+        self::assertSame('/dev/null', $result);
     }
 
     /** @test */
-    public function convertsFloats()
+    public function returnsAnArrayWithAllEnvVars()
     {
         $config = new Config($this->env);
-        $result = $config->env('FLOAT');
+        $result = $config->env();
 
-        self::assertSame(99.99, $result);
-    }
-
-    /** @test */
-    public function convertsTrue()
-    {
-        $config = new Config($this->env);
-        $result = $config->env('BOOLEAN_TRUE');
-
-        self::assertTrue($result);
-    }
-
-    /** @test */
-    public function convertsFalse()
-    {
-        $config = new Config($this->env);
-        $result = $config->env('BOOLEAN_FALSE');
-
-        self::assertFalse($result);
+        self::assertArrayHasKey('STORAGE_PATH', $result);
     }
 }

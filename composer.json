@@ -13,8 +13,8 @@
     }
   ],
   "require": {
-    "php": "^7.1",
-    "symfony/dotenv": "^4.1",
+    "php":                        "^7.1",
+    "tflori/envparser":           "1.0.0-rc.3",
     "tflori/dependency-injector": "^2.1"
   },
   "autoload": {
