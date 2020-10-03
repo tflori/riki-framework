@@ -10,9 +10,6 @@ namespace Riki;
  */
 abstract class Kernel
 {
-    /** @var Application */
-    protected $app;
-
     /**
      * Kernel constructor.
      *
@@ -25,9 +22,10 @@ abstract class Kernel
     }
 
     /**
-     * Handle the request using $app
+     * Handle the execution
      *
+     * @param mixed ...$args
      * @return mixed
      */
-    abstract public function handle();
+    abstract public function handle(...$args);
 }

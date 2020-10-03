@@ -16,7 +16,7 @@ abstract class Config
     public $environment;
 
     /** @var EnvFile */
-    protected $env = [];
+    protected $env;
 
     /**
      * Loads .env and stores the current environment
@@ -52,6 +52,7 @@ abstract class Config
      */
     protected function loadDotEnv(): bool
     {
+        $this->env = new EnvFile();
         if (!$this->environment->usesDotEnv()) {
             return false;
         }
@@ -62,7 +63,6 @@ abstract class Config
         }
 
         putenv('BASE_PATH=' . $this->environment->getBasePath());
-        $this->env = new EnvFile();
         $this->env->read($dotEnvPath);
         return true;
     }
