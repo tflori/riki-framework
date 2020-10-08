@@ -75,4 +75,34 @@ class LoadDotEnvTest extends MockeryTestCase
 
         self::assertArrayHasKey('STORAGE_PATH', $result);
     }
+
+    /** @test */
+    public function reloadsDotEnvFile()
+    {
+        $this->env->shouldReceive('getBasePath')->andReturn('/tmp');
+
+        // for example the config got restored from serialization of old config
+        $config = new Config($this->env);
+        $this->setProtectedProperty($config, 'env', ['STORAGE_PATH' => '/any/path']);
+
+        $result = $config->env('STORAGE_PATH');
+
+        self::assertSame('/tmp/storage', $result);
+    }
+
+    /**
+     * Overwrite a protected or private $property from $object to $value
+     *
+     * @param object $object
+     * @param string $property
+     * @param mixed  $value
+     */
+    protected static function setProtectedProperty($object, string $property, $value)
+    {
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $property = (new \ReflectionClass($object))->getProperty($property);
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+        $property->setAccessible(false);
+    }
 }

@@ -38,6 +38,10 @@ abstract class Config
      */
     public function env(string $name = null, $default = null)
     {
+        if (!$this->env instanceof EnvFile) {
+            $this->loadDotEnv();
+        }
+
         if (is_null($name)) {
             return $this->env->getArrayCopy();
         }
