@@ -14,7 +14,7 @@
   ],
   "require": {
     "php":                        "^7.1 || ^8.0",
-    "tflori/envparser":           "1.0.0-rc.3",
+    "tflori/envparser":           "1.0.0-rc.4",
     "tflori/dependency-injector": "^2.3"
   },
   "autoload": {
