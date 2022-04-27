@@ -20,7 +20,7 @@ class LoadConfigTest extends MockeryTestCase
     /** @var Environment|m\Mock */
     protected $environment;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->app = new Application(__DIR__);
         $this->environment = m::mock(Environment::class, [__DIR__])->makePartial();
@@ -28,7 +28,7 @@ class LoadConfigTest extends MockeryTestCase
         $this->environment->shouldReceive('canCacheConfig')->with()->andReturn(true)->byDefault();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         if (file_exists('/tmp/config.ser')) {
             unlink('/tmp/config.ser');

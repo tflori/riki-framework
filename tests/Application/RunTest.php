@@ -30,7 +30,7 @@ class RunTest extends MockeryTestCase
         ];
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -40,7 +40,7 @@ class RunTest extends MockeryTestCase
         $kernel->shouldReceive('getBootstrappers')->andReturn([])->byDefault();
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         Application::app()->destroy();
