@@ -12,7 +12,7 @@ class LoadDotEnvTest extends MockeryTestCase
     /** @var m\Mock|Environment */
     protected $env;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->env = m::mock(Environment::class);

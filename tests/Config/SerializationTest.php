@@ -12,7 +12,7 @@ class SerializationTest extends MockeryTestCase
     /** @var m\Mock|Environment */
     protected $env;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->env = m::mock(Environment::class);
@@ -25,7 +25,7 @@ class SerializationTest extends MockeryTestCase
         $config = new Config($this->env);
         $serialized = serialize($config);
 
-        self::assertNotContains('environment', $serialized);
+        self::assertStringNotContainsString('environment', $serialized);
     }
 
     /** @test */
@@ -34,8 +34,8 @@ class SerializationTest extends MockeryTestCase
         $config = new Config($this->env);
         $serialized = serialize($config);
 
-        self::assertContains('host', $serialized);
-        self::assertContains('secret', $serialized);
+        self::assertStringContainsString('host', $serialized);
+        self::assertStringContainsString('secret', $serialized);
     }
 
     /** @test */
@@ -44,6 +44,6 @@ class SerializationTest extends MockeryTestCase
         $config = new Config($this->env);
         $serialized = serialize($config);
 
-        self::assertContains('randomKey', $serialized);
+        self::assertStringContainsString('randomKey', $serialized);
     }
 }

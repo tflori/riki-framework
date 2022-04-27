@@ -1,7 +1,11 @@
 # ríki
 
-[![Build Status](https://travis-ci.org/tflori/riki-framework.svg?branch=master)](https://travis-ci.org/tflori/riki-framework)
-[![Coverage Status](https://coveralls.io/repos/github/tflori/riki-framework/badge.svg?branch=master)](https://coveralls.io/github/tflori/riki-framework?branch=master)
+[![.github/workflows/push.yml](https://github.com/tflori/riki-framework/actions/workflows/push.yml/badge.svg)](https://github.com/tflori/riki-framework/actions/workflows/push.yml)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/24b9fce014c9cea99a0d/test_coverage)](https://codeclimate.com/github/tflori/riki-framework/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/24b9fce014c9cea99a0d/maintainability)](https://codeclimate.com/github/tflori/riki-framework/maintainability)
+[![Latest Stable Version](https://poser.pugx.org/tflori/riki-framework/v/stable.svg)](https://packagist.org/packages/tflori/riki-framework)
+[![Total Downloads](https://poser.pugx.org/tflori/riki-framework/downloads.svg)](https://packagist.org/packages/tflori/riki-framework)
+[![License](https://poser.pugx.org/tflori/riki-framework/license.svg)](https://packagist.org/packages/tflori/riki-framework)
 
 This is a minimalistic framework. The only thing this framework defines (for now) is how to configure the project,
 how to define special behaviour on an environment and how to bootstrap and run the application using a `Kernel`.

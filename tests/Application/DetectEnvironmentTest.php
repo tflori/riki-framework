@@ -12,7 +12,7 @@ use Riki\Test\Example\Application;
 
 class DetectEnvironmentTest extends MockeryTestCase
 {
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         Application::app()->destroy();
