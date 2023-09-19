@@ -54,9 +54,7 @@ jobs:
             --color=always
 
       - name: Format Coverage
-        uses: paambaati/codeclimate-action@v5.0.0
-        with:
-          coverage-command: format-coverage -t clover -o coverage/cc-${{ matrix.php_version }}.json coverage/clover.xml
+        run: cc-test-reporter format-coverage -t clover -o coverage/cc-${{ matrix.php_version }}.json coverage/clover.xml
 
       - name: Store Coverage Result
         uses: actions/upload-artifact@v3
