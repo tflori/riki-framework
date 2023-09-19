@@ -36,7 +36,11 @@ jobs:
           mkdir coverage
           wget https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 -qO /usr/bin/cc-test-reporter
           chmod +x /usr/bin/cc-test-reporter
-      - uses: actions/checkout@v1
+      - name: Checkout
+        run: |
+          git init && git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git remote add origin https://github.com/${{ github.repository }}.git
+          git fetch origin ${{ github.sha }} && git reset --hard ${{ github.sha }}
       - name: Install dependencies
         run: composer install --no-interaction --ansi
       - name: Execute tests
