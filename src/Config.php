@@ -2,84 +2,103 @@
 
 namespace Riki;
 
-use EnvParser\EnvFile;
-
 /**
  * Class Config
  *
  * @package Riki
  * @author  Thomas Flori <thflori@gmail.com>
  */
-abstract class Config
+class Config implements \ArrayAccess
 {
-    /** @var Environment */
-    public $environment;
+    protected $config = [];
 
-    /** @var EnvFile */
-    protected $env;
-
-    /**
-     * Loads .env and stores the current environment
-     *
-     * @param Environment $environment
-     */
-    public function __construct(Environment $environment)
+    public function __construct(array $config)
     {
-        $this->environment = $environment;
-        $this->loadDotEnv();
+        $this->config = $config;
+    }
+    
+    public static function fromFiles(array $files, Environment $environment): static {
+        $config = [];
+        foreach ($files as $key => $path) {
+            $result = (function ($environment, $path) {
+                return include $path;
+            })($environment, $path);
+
+            if (is_array($result)) {
+                $config[$key] = $result;
+            }
+        }
+
+        return new static($config);
     }
 
     /**
-     * Get an environment variable (also works from cached config)
-     *
-     * @param ?string $name
-     * @param ?mixed  $default
-     * @return mixed
+     * @param $key
+     * @param $default
+     * @return Config|mixed|null
      */
-    public function env(string $name = null, $default = null)
+    public function get($key, $default = null)
     {
-        if (!$this->env instanceof EnvFile) {
-            $this->loadDotEnv();
+        $parts = explode('.', $key);
+        $current = $this->config;
+
+        foreach ($parts as $part) {
+            if (!is_array($current) || !array_key_exists($part, $current)) {
+                return $this->toConfig($default);
+            }
+            $current = $current[$part];
         }
 
-        if (is_null($name)) {
-            return $this->env->getArrayCopy();
-        }
+        return $this->toConfig($current);
+    }
+    
+    public function set($key, $value)
+    {
+        $parts = explode('.', $key);
+        $current = &$this->config;
 
-        return $this->env->get($name, $default);
+        foreach ($parts as $i => $part) {
+            if ($i === count($parts) - 1) {
+                $current[$part] = $value;
+            } else {
+                if (!isset($current[$part]) || !is_array($current[$part])) {
+                    $current[$part] = [];
+                }
+                $current = &$current[$part];
+            }
+        }
+    }
+    
+    public function push($key, $value)
+    {
+        $this->set($key, array_merge($this->get($key, []), [$value]));
     }
 
-    /**
-     * Loads the .env file configured in environment
-     *
-     * @return bool
-     */
-    protected function loadDotEnv(): bool
+    protected function toConfig($value)
     {
-        $this->env = new EnvFile();
-        if (!$this->environment->usesDotEnv()) {
-            return false;
-        }
-
-        $dotEnvPath = $this->environment->getDotEnvPath();
-        if (!is_readable($dotEnvPath) || is_dir($dotEnvPath)) {
-            return false;
-        }
-
-        putenv('BASE_PATH=' . $this->environment->getBasePath());
-        $this->env->read($dotEnvPath);
-        return true;
+        $isAssoc = is_array($value) &&
+            !empty($value) &&
+            array_keys($value) !== range(0, count($value) - 1);
+        return $isAssoc ? new static($value) : $value;
     }
 
-    /**
-     * Ensures the environment does not get serialized for caching
-     *
-     * @return array
-     */
-    public function __sleep()
+    public function offsetExists($offset)
     {
-        $vars = array_keys(get_class_vars(static::class));
-        array_splice($vars, array_search('environment', $vars), 1);
-        return $vars;
+        return isset($this->config[$offset]);
+    }
+
+    public function offsetGet($offset)
+    {
+        return $this->toConfig($this->config[$offset]);
+    }
+
+    public function offsetSet($offset, $value)
+    {
+        return $this->config[$offset] = $value;
+    }
+
+    public function offsetUnset($offset)
+    {
+        unset($this->config[$offset]);
     }
 }

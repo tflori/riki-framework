@@ -5,104 +5,141 @@ namespace Riki\Test\Config;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Environment;
-use Riki\Test\Example\Config;
+use Riki\Config;
+use Riki\Test\Example\Application;
 
 class LoadDotEnvTest extends MockeryTestCase
 {
-    /** @var m\Mock|Environment */
-    protected $env;
+    private $tempDir;
+    private $envFilePath;
+    private $app;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->env = m::mock(Environment::class);
-        $this->env->shouldReceive('usesDotEnv')->andReturn(true)->byDefault();
-        $this->env->shouldReceive('getDotEnvPath')->andReturn(__DIR__ . '/example.env')->byDefault();
-        $this->env->shouldReceive('getBasePath')->andReturn(dirname(dirname(__DIR__)))->byDefault();
+
+        // Create a temporary directory for testing
+        $this->tempDir = sys_get_temp_dir() . '/riki_config_dotenv_test_' . uniqid();
+        mkdir($this->tempDir, 0755, true);
+
+        // Create a sample .env file
+        $this->envFilePath = $this->tempDir . '/.env';
+        $envContent = <<<'ENV'
+DB_HOST=localhost
+DB_PORT=3306
+APP_NAME=TestApp
+APP_DEBUG=true
+ENV;
+        file_put_contents($this->envFilePath, $envContent . "\n");
     }
 
-    /** @test */
-    public function checksIfEnvironmentUsesDotEnv()
+    protected function tearDown(): void
     {
-        $this->env->shouldReceive('usesDotEnv')->with()->once()->andReturn(false);
+        // Clean up temporary directory
+        $this->removeDirectoryRecursively($this->tempDir);
 
-        new Config($this->env);
+        // Clear environment variables set during tests
+        putenv('DB_HOST');
+        putenv('DB_PORT');
+        putenv('APP_NAME');
+        putenv('APP_DEBUG');
+
+        if ($this->app) {
+            $this->app->destroy();
+        }
+        parent::tearDown();
     }
 
-    /** @test */
-    public function getsDotEnvPathFromEnvironment()
+    private function removeDirectoryRecursively($dir)
     {
-        $this->env->shouldReceive('getDotEnvPath')->with()->once()->andReturn(__DIR__ . '/not-existing.env');
+        if (!is_dir($dir)) {
+            return;
+        }
 
-        new Config($this->env);
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($path)) {
+                $this->removeDirectoryRecursively($path);
+            } else {
+                unlink($path);
+            }
+        }
+        rmdir($dir);
     }
 
-    /** @test */
-    public function createsBasePathEnvironmentVariable()
+    public function testConfigCanAccessEnvironmentVariablesAfterLoading()
     {
-        $this->env->shouldReceive('getBasePath')->with()->once()->andReturn('/tmp');
+        $environment = new Environment($this->tempDir);
+        $this->app = new Application($environment);
 
-        new Config($this->env);
+        // Load environment first
+        $environment->loadEnvironment();
 
-        self::assertSame('/tmp', getenv('BASE_PATH'));
+        // Create a temporary config file that uses env() helper
+        $configFile = $this->tempDir . '/test_db_config.php';
+        $configContent = <<<'PHP'
+<?php
+return ['database' => ['host' => env('DB_HOST', 'default_host')]];
+PHP;
+        file_put_contents($configFile, $configContent . "\n");
+
+        // Load config from file using fromFiles method
+        $config = Config::fromFiles(['db' => $configFile], $environment);
+
+        $this->assertEquals('localhost', $config['db']['database']['host']);
     }
 
-    /** @test */
-    public function loadsDotEnvFile()
+    public function testConfigResolvesMultipleEnvironmentVariables()
     {
-        $this->env->shouldReceive('getBasePath')->andReturn('/tmp');
+        $environment = new Environment($this->tempDir);
+        $this->app = new Application($environment);
+        $environment->loadEnvironment();
 
-        $config = new Config($this->env);
-        $result = $config->env('STORAGE_PATH');
+        // Create a temporary config file that uses env() helper
+        $configFile = $this->tempDir . '/test_multi_config.php';
+        $configContent = <<<'PHP'
+<?php
+return [
+    'database' => [
+        'host' => env('DB_HOST', 'default_host'),
+        'port' => env('DB_PORT', 3307)
+    ],
+    'app' => [
+        'name' => env('APP_NAME', 'DefaultApp'),
+        'debug' => env('APP_DEBUG', false)
+    ]
+];
+PHP;
+        file_put_contents($configFile, $configContent);
 
-        self::assertSame('/tmp/storage', $result);
+        // Load config from file using fromFiles method
+        $config = Config::fromFiles(['multi' => $configFile], $environment);
+
+        $this->assertEquals('localhost', $config['multi']['database']['host']);
+        $this->assertEquals('3306', $config['multi']['database']['port']);
+        $this->assertEquals('TestApp', $config['multi']['app']['name']);
+        $this->assertEquals('true', $config['multi']['app']['debug']) || $this->assertTrue($config['multi']['app']['debug']);
     }
 
-    /** @test */
-    public function returnsDefaultWhenMissing()
+    public function testConfigHandlesMissingEnvironmentVariables()
     {
-        $config = new Config($this->env);
-        $result = $config->env('ANOTHER_PATH', '/dev/null');
+        $environment = new Environment($this->tempDir);
+        $environment->loadEnvironment();
+        $this->app = new Application($environment);
 
-        self::assertSame('/dev/null', $result);
-    }
+        // Create a temporary config file that uses env() helper with a missing variable
+        $configFile = $this->tempDir . '/test_missing_config.php';
+        $configContent = <<<'PHP'
+<?php
+return ['missing_var' => env('MISSING_VAR', 'default_value')];
+PHP;
+        file_put_contents($configFile, $configContent . "\n");
 
-    /** @test */
-    public function returnsAnArrayWithAllEnvVars()
-    {
-        $config = new Config($this->env);
-        $result = $config->env();
+        // Load config from file using fromFiles method
+        $config = Config::fromFiles(['missing' => $configFile], $environment);
 
-        self::assertArrayHasKey('STORAGE_PATH', $result);
-    }
-
-    /** @test */
-    public function reloadsDotEnvFile()
-    {
-        $this->env->shouldReceive('getBasePath')->andReturn('/tmp');
-
-        // for example the config got restored from serialization of old config
-        $config = new Config($this->env);
-        $this->setProtectedProperty($config, 'env', ['STORAGE_PATH' => '/any/path']);
-
-        $result = $config->env('STORAGE_PATH');
-
-        self::assertSame('/tmp/storage', $result);
-    }
-
-    /**
-     * Overwrite a protected or private $property from $object to $value
-     *
-     * @param object $object
-     * @param string $property
-     * @param mixed  $value
-     */
-    protected static function setProtectedProperty($object, string $property, $value)
-    {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $property = (new \ReflectionClass($object))->getProperty($property);
-        $property->setAccessible(true);
-        $property->setValue($object, $value);
-        $property->setAccessible(false);
+        // Missing variables should return the default value
+        $this->assertEquals('default_value', $config['missing']['missing_var']);
     }
 }

@@ -2,8 +2,9 @@
 
 namespace Riki\Test\Example;
 
-use Riki\Environment;
-
+/**
+ * @deprecated you don't need to create own config classes anymore but you can still use them
+ */
 class Config extends \Riki\Config
 {
     /** @var \stdClass */
@@ -11,9 +12,9 @@ class Config extends \Riki\Config
 
     public $key = 'randomKey';
 
-    public function __construct(Environment $environment)
+    public function __construct()
     {
-        parent::__construct($environment);
+        parent::__construct([]);
         $this->dbConfig = (object)[
             'host' => 'localhost',
             'port' => 3306,
