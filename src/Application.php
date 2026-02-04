@@ -139,9 +139,7 @@ abstract class Application extends Container
      */
     protected function loadConfigurationCache(): ?Config
     {
-        /** @var Environment $environment */
-        $environment = $this->get('environment');
-        $cachePath = $this->configCachePath ?? $environment->cachePath('config.dat');
+        $cachePath = $this->configCachePath ?? $this->get('environment')->cachePath('config.dat');
         if (!$cachePath || !is_readable($cachePath) || is_dir($cachePath)) {
             return null;
         }
@@ -163,6 +161,24 @@ abstract class Application extends Container
         $environment = $this->get('environment');
         $environment->loadEnvironment();
         return Config::fromFiles($this->locateConfigFiles($environment->configPath()), $environment);
+    }
+
+    /**
+     * Rebuilds the configuration cache
+     *
+     * @return bool
+     */
+    public function rebuildConfigurationCache(): bool
+    {
+        $config = $this->generateConfiguration();
+        $cachePath = $this->configCachePath ?? $this->get('environment')->cachePath('config.dat');
+
+        $cacheDir = dirname($cachePath);
+        if (is_file($cacheDir) || !is_dir($cacheDir) && !mkdir($cacheDir, 0777, true)) {
+            return false;
+        }
+
+        return file_put_contents($cachePath, serialize($config)) > 0;
     }
 
     /**
