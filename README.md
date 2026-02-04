@@ -1,8 +1,8 @@
 # ríki
 
 [![.github/workflows/push.yml](https://github.com/tflori/riki-framework/actions/workflows/push.yml/badge.svg)](https://github.com/tflori/riki-framework/actions/workflows/push.yml)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/24b9fce014c9cea99a0d/test_coverage)](https://codeclimate.com/github/tflori/riki-framework/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/24b9fce014c9cea99a0d/maintainability)](https://codeclimate.com/github/tflori/riki-framework/maintainability)
+[![Code Coverage](https://qlty.sh/gh/tflori/projects/riki-framework/coverage.svg)](https://qlty.sh/gh/tflori/projects/riki-framework)
+[![Maintainability](https://qlty.sh/gh/tflori/projects/riki-framework/maintainability.svg)](https://qlty.sh/gh/tflori/projects/riki-framework)
 [![Latest Stable Version](https://poser.pugx.org/tflori/riki-framework/v/stable.svg)](https://packagist.org/packages/tflori/riki-framework)
 [![Total Downloads](https://poser.pugx.org/tflori/riki-framework/downloads.svg)](https://packagist.org/packages/tflori/riki-framework)
 [![License](https://poser.pugx.org/tflori/riki-framework/license.svg)](https://packagist.org/packages/tflori/riki-framework)
