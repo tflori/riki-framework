@@ -2,21 +2,27 @@
 
 namespace Riki\Test\Example;
 
-use Riki\Test\Example\Environment\Fallback;
+use Riki\Config;
+use Riki\Environment;
 
 class Application extends \Riki\Application
 {
-    protected static $fallbackEnvironment = Fallback::class;
-    protected static $environmentNamespace = Environment::class;
-    protected static $configClass = Config::class;
+    protected static string $configClass = Config::class;
 
     public function __construct(
-        string $basePath,
-        string $fallbackEnvironment = Fallback::class,
-        string $configClass = Config::class
+        Environment $environment,
+        array $options = []
     ) {
-        static::$fallbackEnvironment = $fallbackEnvironment;
-        static::$configClass = $configClass;
-        parent::__construct($basePath);
+        static::$configClass = $options['configClass'] ?? Config::class;
+        $this->configCachePath = $options['cachePath'] ?? null;
+        parent::__construct($environment);
+    }
+
+    protected function generateConfiguration(): Config
+    {
+        /** @var Environment $environment */
+        $environment = $this->get('environment');
+        $environment->loadEnvironment();
+        return self::$configClass::fromFiles($this->locateConfigFiles($environment->configPath()), $environment);
     }
 }

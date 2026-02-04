@@ -2,13 +2,10 @@
 
 namespace Riki\Test\Application;
 
-use DependencyInjector\NotFoundException;
 use Mockery as m;
 use Mockery\Adapter\Phpunit\MockeryTestCase;
 use Riki\Config;
 use Riki\Environment;
-use Riki\Exception;
-use Riki\Test\Example\Environment\Fallback;
 use Riki\Test\Example\Application;
 use Riki\Test\Example\Config as ConfigExample;
 
@@ -22,10 +19,9 @@ class LoadConfigTest extends MockeryTestCase
 
     protected function setUp(): void
     {
-        $this->app = new Application(__DIR__);
-        $this->environment = m::mock(Environment::class, [__DIR__])->makePartial();
-        $this->app->instance('environment', $this->environment);
-        $this->environment->shouldReceive('canCacheConfig')->with()->andReturn(true)->byDefault();
+        $this->environment = m::mock(Environment::class)->makePartial();
+        $this->environment->__construct(__DIR__);
+        $this->app = m::mock(Application::class)->makePartial();
     }
 
     protected function tearDown(): void
@@ -36,68 +32,112 @@ class LoadConfigTest extends MockeryTestCase
         Application::app()->destroy();
     }
 
+    protected function callProtectedMethod(object $object, string $method, array $args = [])
+    {
+        $reflection = new \ReflectionMethod($object, $method);
+        /** @noinspection PhpExpressionResultUnusedInspection */
+        $reflection->setAccessible(true);
+        return $reflection->invokeArgs($object, $args);
+    }
+
+    protected function makeTempDir(string $prefix): string
+    {
+        $base = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR);
+        $path = $base . DIRECTORY_SEPARATOR . $prefix . '-' . uniqid('', true);
+        mkdir($path, 0777, true);
+        return $path;
+    }
+
     /** @test */
     public function storesTheConfigInstance()
     {
-        $this->app->loadConfiguration();
+        $this->app->__construct($this->environment, ['configClass' => ConfigExample::class]);
 
-        self::assertInstanceOf(Config::class, $this->app->config);
-        self::assertInstanceOf(Config::class, $this->app->get(ConfigExample::class));
+        self::assertInstanceOf(ConfigExample::class, $this->app->config);
+        self::assertInstanceOf(ConfigExample::class, $this->app->get(Config::class));
     }
 
     /** @test */
     public function loadsSerializedConfig()
     {
-        $this->environment->shouldReceive('getConfigCachePath')->with()
-            ->once()->andReturn(__DIR__ . '/../Example/config.ser');
-
-        $this->app->loadConfiguration();
+        $this->app->__construct($this->environment, ['cachePath' => __DIR__ . '/../Example/config.ser']);
 
         self::assertSame('Ie0g2aUbJi8=', $this->app->config->key);
     }
 
     /** @test */
-    public function instantiatesNewConfig()
+    public function locateConfigFilesReturnsEmptyArrayWhenPathIsNotDirectory()
     {
-        $this->environment->shouldReceive('canCacheConfig')->with()
-            ->once()->andReturn(false);
-        $this->environment->shouldReceive('getConfigCachePath')->with()
-            ->once()->andReturn(__DIR__ . '/../Example/config.ser');
+        $this->app->__construct($this->environment);
 
-        $this->app->loadConfiguration();
+        $result = $this->callProtectedMethod($this->app, 'locateConfigFiles', ['/path/does/not/exist']);
 
-        self::assertNotSame('Ie0g2aUbJi8=', $this->app->config->key);
+        self::assertSame([], $result);
     }
 
     /** @test */
-    public function setsTheCurrentEnvironment()
+    public function generateConfigurationLoadsEnvironmentAndConfigFiles()
     {
-        $this->environment->shouldReceive('getConfigCachePath')->with()
-            ->once()->andReturn(__DIR__ . '/../Example/config.ser');
+        $root = $this->makeTempDir('riki-config');
+        $configDir = $root . DIRECTORY_SEPARATOR . 'config';
+        mkdir($configDir, 0777, true);
 
-        $this->app->loadConfiguration();
+        $envFile = $root . DIRECTORY_SEPARATOR . '.env';
+        file_put_contents(
+            $envFile,
+            <<<'ENV'
+APP_ENV=
+FOO=from-env
+ENV
+        );
 
-        self::assertSame($this->environment, $this->app->config->environment);
+        $configFile = $configDir . DIRECTORY_SEPARATOR . 'test.php';
+        file_put_contents(
+            $configFile,
+            <<<'PHP'
+<?php
+return ['value' => env('FOO', 'default')];
+PHP
+        );
+
+        $environment = new Environment($root);
+        $this->app->__construct($environment);
+
+        $config = $this->callProtectedMethod($this->app, 'generateConfiguration');
+
+        self::assertInstanceOf(Config::class, $config);
+        self::assertSame('from-env', $config->get('test.value'));
     }
 
     /** @test */
-    public function throwsWhenConfigDoesNotExist()
+    public function baseGenerateConfigurationIsUsedByDefault()
     {
-        Application::app()->destroy();
-        self::expectException(Exception::class);
-        self::expectExceptionMessage('Configuration not found');
+        $root = $this->makeTempDir('riki-config-base');
+        $configDir = $root . DIRECTORY_SEPARATOR . 'config';
+        mkdir($configDir, 0777, true);
 
-        $app = new Application(__DIR__, Fallback::class, 'UnknownClass');
-        $app->instance('environment', new Fallback(__DIR__));
-    }
+        $envFile = $root . DIRECTORY_SEPARATOR . '.env';
+        file_put_contents(
+            $envFile,
+            <<<'ENV'
+APP_ENV=
+FOO=base-env
+ENV
+        );
 
-    /** @test */
-    public function throwsWhenEnvironmentIsNotDefined()
-    {
-        self::expectException(NotFoundException::class);
-        self::expectExceptionMessage('Name environment could not be resolved');
+        $configFile = $configDir . DIRECTORY_SEPARATOR . 'base.php';
+        file_put_contents(
+            $configFile,
+            <<<'PHP'
+<?php
+return ['value' => env('FOO', 'default')];
+PHP
+        );
 
-        $this->app->delete('environment');
-        $this->app->loadConfiguration();
+        $environment = new Environment($root);
+        $app = new class ($environment) extends \Riki\Application {
+        };
+
+        self::assertSame('base-env', $app->config->get('base.value'));
     }
 }

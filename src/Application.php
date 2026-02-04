@@ -20,44 +20,49 @@ use DependencyInjector\DI;
  */
 abstract class Application extends Container
 {
-    /** @var Application */
-    protected static $app;
+    protected static ?Application $app = null;
 
-    /** @var string */
-    protected $basePath;
-
-    /** @var string  */
-    protected static $fallbackEnvironment = 'App\Environment';
-
-    /** @var string  */
-    protected static $environmentNamespace = 'App\Environment';
-
-    /** @var string */
-    protected static $configClass = 'App\Config';
+    /** Overwrite this to change the path where the config cache is stored (defaults to <cache>/config.dat)  */
+    protected ?string $configCachePath = null;
 
     /**
      * Application Constructor
      *
-     * @param string $basePath
-     * @throws Exception
+     * @param Environment $environment
+     * @throws \Throwable
      */
-    public function __construct(string $basePath)
+    public function __construct(Environment $environment)
     {
-        if (static::$app) {
+        if (static::$app !== null) {
             throw new Exception('There can only be one application at the same time');
         }
         static::$app = $this;
 
-        $this->basePath = $basePath;
+        try {
+            parent::__construct();
+            DI::setContainer($this);
 
-        parent::__construct();
-        DI::setContainer($this);
+            $this->instance(Application::class, $this);
+            $this->instance('app', $this);
+            $this->instance('environment', $environment);
+            $this->loadConfiguration();
+            $this->initDependencies();
+        } catch (\Throwable $error) {
+            $this->bootError($error);
+        }
 
-        $this->instance(Application::class, $this);
-        $this->instance('app', $this);
-        $this->detectEnvironment();
-        $this->loadConfiguration();
-        $this->initDependencies();
+    }
+
+    /**
+     * Called when an error occurs during bootstrapping
+     *
+     * @param \Throwable $error
+     * @throws \Throwable
+     * @codeCoverageIgnore trivial code
+     */
+    protected function bootError(\Throwable $error)
+    {
+        throw $error;
     }
 
     /**
@@ -65,7 +70,7 @@ abstract class Application extends Container
      *
      * After destroying you can create a new application.
      */
-    public function destroy()
+    public function destroy(): void
     {
         static::$app = null;
         $this->factories = [];
@@ -80,8 +85,11 @@ abstract class Application extends Container
      * @return mixed
      * @codeCoverageIgnore trivial code
      */
-    public static function __callStatic($method, $args)
+    public static function __callStatic(string $method, array $args)
     {
+        if (static::$app === null) {
+            throw new Exception('Application not initialized');
+        }
         return static::$app->get($method, ...$args);
     }
 
@@ -109,64 +117,69 @@ abstract class Application extends Container
     }
 
     /**
-     * Detects the environment for APP_ENV environment variable or 'development'
-     *
-     * When there is a *Cli environment and this is executed via command line it prefers *Cli.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function detectEnvironment(): bool
-    {
-        $classes = [ static::$fallbackEnvironment ];
-        $appEnv = getenv('APP_ENV') ?: 'development';
-        $classes[] = static::$environmentNamespace . '\\' . ucfirst($appEnv);
-        if (PHP_SAPI === 'cli') {
-            $classes[] = static::$environmentNamespace . '\\' . ucfirst($appEnv) . 'Cli';
-        }
-        foreach (array_reverse($classes) as $class) {
-            if (class_exists($class)) {
-                $this->instance('environment', new $class($this->getBasePath()));
-                $this->alias('environment', static::$fallbackEnvironment);
-                return true;
-            }
-        }
-
-        throw new Exception('No environment found');
-    }
-
-    /**
      * Loads the configuration
      *
      * When caching is enabled and a cached config exists this will be loaded otherwise a new object will be
      * initialized.
      *
      * @return bool
-     * @throws Exception
      */
-    public function loadConfiguration(): bool
+    protected function loadConfiguration(): bool
     {
-        /** @var \Riki\Environment $environment */
-        $environment = $this->get('environment');
-
-        $cachePath = $environment->getConfigCachePath();
-        if ($environment->canCacheConfig() && is_readable($cachePath) && !is_dir($cachePath)) {
-            /** @var Config $config */
-            $config = unserialize(file_get_contents($cachePath));
-            $config->environment = $environment;
-        } elseif (class_exists(static::$configClass)) {
-            $config =  new static::$configClass($environment);
-        } else {
-            throw new Exception('Configuration not found');
-        }
-
+        $config = $this->loadConfigurationCache() ?? $this->generateConfiguration();
         $this->instance('config', $config);
-        $this->alias('config', static::$configClass);
+        $this->alias('config', Config::class);
         return true;
     }
 
-    public function getBasePath(): string
+    /**
+     * Loads the cached configuration
+     *
+     * @return Config|null
+     */
+    protected function loadConfigurationCache(): ?Config
     {
-        return $this->basePath;
+        /** @var Environment $environment */
+        $environment = $this->get('environment');
+        $cachePath = $this->configCachePath ?? $environment->cachePath('config.dat');
+        if (!$cachePath || !is_readable($cachePath) || is_dir($cachePath)) {
+            return null;
+        }
+
+        /** @var Config $config */
+        $config = @unserialize(file_get_contents($cachePath));
+
+        return  $config instanceof Config ? $config : null;
+    }
+
+    /**
+     * Generates a new configuration object
+     *
+     * @return Config
+     */
+    protected function generateConfiguration(): Config
+    {
+        /** @var Environment $environment */
+        $environment = $this->get('environment');
+        $environment->loadEnvironment();
+        return Config::fromFiles($this->locateConfigFiles($environment->configPath()), $environment);
+    }
+
+    /**
+     * Locates the config files in the given path
+     *
+     * @param string $path
+     * @return array
+     */
+    protected function locateConfigFiles(string $path): array
+    {
+        if (is_dir($path)) {
+            return array_reduce(glob($path . '/*.php'), function ($carry, $item) {
+                $name = pathinfo($item, PATHINFO_FILENAME);
+                $carry[$name] = $item;
+                return $carry;
+            }, []);
+        }
+        return [];
     }
 }
