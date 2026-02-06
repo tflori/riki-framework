@@ -1,8 +1,11 @@
 <?php
 
 if (!function_exists('env')) {
-    function env(string $key, $default = null)
+    function env(string $key = null, $default = null)
     {
+        if (is_null($key)) {
+            return \Riki\Application::environment();
+        }
         return \Riki\Application::environment()->get($key, $default);
     }
 }

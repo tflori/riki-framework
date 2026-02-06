@@ -1,6 +1,6 @@
 <?php
 
-namespace Riki\Test;
+namespace Riki\Test\Environment;
 
 use PHPUnit\Framework\TestCase;
 use Riki\Test\Example\Environment;

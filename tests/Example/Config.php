@@ -12,9 +12,9 @@ class Config extends \Riki\Config
 
     public $key = 'randomKey';
 
-    public function __construct()
+    public function __construct(array $config)
     {
-        parent::__construct([]);
+        parent::__construct($config);
         $this->dbConfig = (object)[
             'host' => 'localhost',
             'port' => 3306,
