@@ -198,4 +198,16 @@ abstract class Application extends Container
         }
         return [];
     }
+
+    /**
+     * temporary overwrite
+     * @template T of object
+     * @param class-string<T> $class
+     * @param array $args
+     * @return T|mixed
+     */
+    public function make(string $class, ...$args): mixed
+    {
+        return parent::make($class, ...$args);
+    }
 }
