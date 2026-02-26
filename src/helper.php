@@ -7,7 +7,7 @@ if (!function_exists('app')) {
      * @template T of object
      * @param string|class-string<T>|null $class
      * @param array $args
-     * @return Application|T|mixed
+     * @return ($class is null ? Application : ($class is class-string<T> ? T : mixed))
      */
     function app(string $class = null, ...$args) {
         if (!$class) {
