@@ -74,7 +74,10 @@ class Config implements \ArrayAccess
         $this->set($key, array_merge($this->get($key, []), [$value]));
     }
 
-    protected function toConfig($value)
+    /**
+     * @noinspection PhpMixedReturnTypeCanBeReducedInspection wrong! $value can be anything
+     */
+    protected function toConfig($value): mixed
     {
         $isAssoc = is_array($value) &&
             !empty($value) &&
@@ -87,7 +90,7 @@ class Config implements \ArrayAccess
         return isset($this->config[$offset]);
     }
 
-    public function offsetGet($offset): static
+    public function offsetGet($offset): mixed
     {
         return $this->toConfig($this->config[$offset]);
     }
