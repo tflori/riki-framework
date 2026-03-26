@@ -82,22 +82,22 @@ class Config implements \ArrayAccess
         return $isAssoc ? new static($value) : $value;
     }
 
-    public function offsetExists($offset)
+    public function offsetExists($offset): bool
     {
         return isset($this->config[$offset]);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): static
     {
         return $this->toConfig($this->config[$offset]);
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
-        return $this->config[$offset] = $value;
+        $this->config[$offset] = $value;
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($this->config[$offset]);
     }
