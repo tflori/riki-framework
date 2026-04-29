@@ -54,6 +54,16 @@ class UsageTest extends TestCase
     }
 
     /** @test */
+    public function keysReturnsTheKeys()
+    {
+        $config = new Config(['foo' => 'bar', 1 => 23]);
+
+        $keys = $config->keys();
+
+        self::assertSame(['foo', 1], $keys);
+    }
+
+    /** @test */
     public function setCreatesNestedStructure()
     {
         $config = new Config([]);

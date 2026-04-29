@@ -20,6 +20,7 @@ class Config implements \ArrayAccess
     public static function fromFiles(array $files, Environment $environment): static {
         $config = [];
         foreach ($files as $key => $path) {
+            // sonarqube will not like this :D
             $result = (function ($environment, $path) {
                 return include $path;
             })($environment, $path);
@@ -32,12 +33,22 @@ class Config implements \ArrayAccess
         return new static($config);
     }
 
+    /** @codeCoverageIgnore trivial */
+    public function __get(string $name)
+    {
+        return $this->get($name);
+    }
+
+    /** @return string[] */
+    public function keys(): array
+    {
+        return array_keys($this->config);
+    }
+
     /**
-     * @param $key
-     * @param $default
      * @return Config|mixed|null
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $parts = explode('.', $key);
         $current = $this->config;
