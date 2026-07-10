@@ -102,17 +102,17 @@ class Environment implements \ArrayAccess
         return $this->environment->offsetExists($offset);
     }
 
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         return $this->environment->offsetGet($offset);
     }
 
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         // noop - we can't change the environment
     }
 
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         // noop - we can't change the environment
     }

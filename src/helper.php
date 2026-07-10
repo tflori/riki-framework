@@ -9,7 +9,7 @@ if (!function_exists('app')) {
      * @param array $args
      * @return ($class is null ? Application : ($class is class-string<T> ? T : mixed))
      */
-    function app(string $class = null, ...$args) {
+    function app(?string $class = null, ...$args) {
         if (!$class) {
             return Application::app();
         }
@@ -23,7 +23,7 @@ if (!function_exists('app')) {
 }
 
 if (!function_exists('env')) {
-    function env(string $key = null, $default = null)
+    function env(?string $key = null, $default = null)
     {
         if (is_null($key)) {
             return Application::environment();
@@ -33,7 +33,7 @@ if (!function_exists('env')) {
 }
 
 if (!function_exists('config')) {
-    function config(string $key = null, $default = null)
+    function config(?string $key = null, $default = null)
     {
         if (is_null($key)) {
             return Application::config();
